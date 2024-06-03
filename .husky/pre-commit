@@ -1,0 +1,30 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Define color variables
+source .husky/colours.sh
+
+# Check if Git is in the middle of a rebase operation
+if [[ -n "$GIT_SEQUENCE_EDITOR" ]]; then
+  echo -e "${TURQUOISE}Skipping pre-commit hook during rebase.${NOCOLOR}"
+  exit 0
+fi
+
+# Ensure Pester is installed
+echo "Checking for Pester..."
+powershell -NoProfile -ExecutionPolicy Bypass -Command "if (-not (Get-Module -ListAvailable -Name Pester)) { Install-Module -Name Pester -Force -Scope CurrentUser }"
+
+set +e # allow script to continue even if an error occurs
+
+# Run the PowerShell Pester tests
+echo -e "${BLUE}Running PowerShell Pester tests...${NOCOLOR}"
+test_results=$(powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-Pester -Script .\AddNumbers.Tests.ps1")
+echo -e "${BLUE}Test results: ${LILAC}$test_results${NOCOLOR}"
+
+if echo "$test_results" | grep -iq 'Failed: [1-9][0-9]*'; then
+    echo -e "${RED}\t*** Tests must pass before committing ***${NOCOLOR}"
+  exit 1
+fi
+
+echo -e "${GREEN}\t*** All tests passed ***${NOCOLOR}"
+echo
