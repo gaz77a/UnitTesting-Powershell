@@ -1,5 +1,5 @@
 
-function Get-ChildV3 {
+function Get-ChildV5 {
     param (
         [string]$suffix
     )
@@ -7,4 +7,4 @@ function Get-ChildV3 {
     return "Some original child text: $suffix"
 }
 
-Export-ModuleMember -Function Get-ChildV3
+Export-ModuleMember -Function Get-ChildV5

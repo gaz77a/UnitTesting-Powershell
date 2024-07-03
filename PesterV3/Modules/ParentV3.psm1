@@ -1,13 +1,13 @@
 Import-Module "$PSScriptRoot\ChildV3.psm1"
 
-function Get-Parent {
+function Get-ParentV3 {
     param (
         [string]$prefix,
         [string]$suffix
     )
 
-    $childResult = Get-Child -suffix $suffix
+    $childResult = Get-ChildV3 -suffix $suffix
     return "$prefix : $childResult"
 }
 
-Export-ModuleMember -Function Get-Parent
+Export-ModuleMember -Function Get-ParentV3
