@@ -18,6 +18,16 @@ Describe "Add-Numbers" {
         # Act & Assert
         Add-NumbersV5 -a -2 -b -3 | Should -Be -5
     }
+
+    It "GIVEN_InputVariables_WHEN_Add-NumbersV5_THEN_ShouldAddTheNumbers" {
+        # Arrange
+        $a = 2
+        $b = 3
+
+        # Act & Assert
+        $expected = 5
+        Add-NumbersV5 -a $a -b $b | Should -Be $expected
+    }
 }
 
 Describe "Add-WithRandomNumbers" {
