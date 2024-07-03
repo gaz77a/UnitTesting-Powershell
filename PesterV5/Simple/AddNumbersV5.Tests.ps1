@@ -31,15 +31,32 @@ Describe "Add-Numbers" {
 }
 
 Describe "Add-WithRandomNumbers" {
-    It "should return the sum of the inputs and the mocked random number" {
-        # Arrange
-        Mock Get-RandomNumberV5 { return 42 }
+    Context "When mocking Get-RandomNumberV5 with hard coded values" {
+            It "should return the sum of the inputs and the mocked random number" {
+            # Arrange
+            Mock Get-RandomNumberV5 { return 42 }
 
-        # Act
-        $result = Add-WithRandomNumbersV5 -a 5 -b 10
+            # Act
+            $result = Add-WithRandomNumbersV5 -a 5 -b 10
 
-        #Assert
-        $result | Should -Be 57 # 5 + 10 + 42
-        Assert-MockCalled Get-RandomNumberV5 -Exactly 1
+            #Assert
+            $result | Should -Be 57 # 5 + 10 + 42
+            Assert-MockCalled Get-RandomNumberV5 -Exactly 1
+        }
+    }
+
+    Context "When mocking Get-RandomNumberV5 with variable values" {
+        It "GIVEN_MocksWithVariables_WHEN_Add-WithRandomNumbersV5_THEN_ShouldAddTheNumbers" {
+            # Arrange
+            $mockedResult = 43
+            Mock Get-RandomNumberV5 { return $mockedResult }
+
+            # Act
+            $result = Add-WithRandomNumbersV5 -a 5 -b 10
+
+            #Assert
+            $result | Should -Be 58 # 5 + 10 + 43
+            Assert-MockCalled Get-RandomNumberV5 -Exactly 1
+        }
     }
 }
