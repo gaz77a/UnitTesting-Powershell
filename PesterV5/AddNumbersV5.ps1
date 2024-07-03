@@ -1,8 +1,8 @@
-function Get-RandomNumber {
+function Get-RandomNumberV5 {
     return Get-Random -Minimum 1 -Maximum 100
 }
 
-function Add-Numbers {
+function Add-NumbersV5 {
     param (
         [int]$a,
         [int]$b
@@ -11,12 +11,12 @@ function Add-Numbers {
     return $a + $b
 }
 
-function Add-WithRandomNumbers {
+function Add-WithRandomNumbersV5 {
     param (
         [int]$a,
         [int]$b
     )
 
-    $randomNumber = Get-RandomNumber
+    $randomNumber = Get-RandomNumberV5
     return $a + $b + $randomNumber
 }

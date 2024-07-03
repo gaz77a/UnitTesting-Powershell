@@ -16,9 +16,22 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "if (-not (Get-Module -Li
 
 set +e # allow script to continue even if an error occurs
 
-# Run the PowerShell Pester tests
-echo -e "${BLUE}Running PowerShell Pester tests...${NOCOLOR}"
-test_results=$(powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-Pester -Script .\AddNumbers.Tests.ps1")
+# Run the PowerShell Pester V3 tests
+echo -e "${BLUE}Running PowerShell Pester V3 tests...${NOCOLOR}"
+test_results=$(powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-Pester -Script .\PesterV3\*.Tests.ps1")
+echo -e "${BLUE}Test results: ${LILAC}$test_results${NOCOLOR}"
+
+if echo "$test_results" | grep -iq 'Failed: [1-9][0-9]*'; then
+    echo -e "${RED}\t*** Tests must pass before committing ***${NOCOLOR}"
+  exit 1
+fi
+
+echo -e "${GREEN}\t*** All tests passed ***${NOCOLOR}"
+echo
+
+# Run the PowerShell Pester V5 tests
+echo -e "${BLUE}Running PowerShell Pester V5 tests...${NOCOLOR}"
+test_results=$(pwsh -NoProfile -ExecutionPolicy Bypass -Command "Invoke-Pester -Script .\PesterV5\*.Tests.ps1")
 echo -e "${BLUE}Test results: ${LILAC}$test_results${NOCOLOR}"
 
 if echo "$test_results" | grep -iq 'Failed: [1-9][0-9]*'; then
