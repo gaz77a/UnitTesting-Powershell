@@ -31,7 +31,7 @@ echo
 
 # Run the PowerShell Pester V5 tests
 echo -e "${BLUE}Running PowerShell Pester V5 tests...${NOCOLOR}"
-test_results=$(pwsh -NoProfile -ExecutionPolicy Bypass -Command "Invoke-Pester -Script .\PesterV5\*\*.Tests.ps1")
+test_results=$(pwsh -NoProfile -ExecutionPolicy Bypass -Command "Invoke-Pester -Script .\PesterV5\*\*.Tests.ps1" -Output Detailed)
 echo -e "${BLUE}Test results: ${LILAC}$test_results${NOCOLOR}"
 
 if echo "$test_results" | grep -iq 'Failed: [1-9][0-9]*'; then

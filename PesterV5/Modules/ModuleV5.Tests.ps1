@@ -37,4 +37,23 @@ Describe "Get-ParentV5" {
                 | Should -Be "Some Prefix : Some original child text: Some Suffix"
         }
     }
+
+    Context "MocksWithVariables Not Supported" {
+        It "GIVEN_MocksWithVariables_WHEN_Get-ParentV5_THEN_MockedVariableNotAvailable" {
+            # Arrange
+            $mockedResult = "Mocked child text: Some Suffix using a variable"
+            $mockScript = {
+                return "Mocked child text using variables is possible in V5: - $mockedResult -"
+            }
+
+            Mock -ModuleName ParentV5 -CommandName ChildV5\Get-ChildV5 -MockWith $mockScript -Verifiable
+
+            # Act & Assert
+            ChildV5\Get-ChildV5 -suffix "Some Suffix" `
+                | Should -Be "Some original child text: Some Suffix"
+
+            ParentV5\Get-ParentV5 -prefix "Some Prefix" -suffix "Some Suffix" `
+                | Should -Be "Some Prefix : Mocked child text using variables is possible in V5: - Mocked child text: Some Suffix using a variable -"
+        }
+    }
 }

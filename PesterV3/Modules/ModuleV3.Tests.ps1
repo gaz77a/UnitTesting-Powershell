@@ -37,4 +37,23 @@ Describe "Get-ParentV3" {
                 | Should Be "Some Prefix : Some original child text: Some Suffix"
         }
     }
+
+    Context "MocksWithVariables" {
+        It "GIVEN_MocksWithVariables_WHEN_Get-ParentV3_THEN_MockedVariableNotAvailable" {
+            # Arrange
+            $mockedResult = "Mocked child text: Some Suffix using a variable"
+            $mockScript = {
+                return "Mocked child text using variables is not possible in V3 due to scopping: - $mockedResult -"
+            }
+
+            Mock -ModuleName ParentV3 -CommandName ChildV3\Get-ChildV3 -MockWith $mockScript -Verifiable
+
+            # Act & Assert
+            ChildV3\Get-ChildV3 -suffix "Some Suffix" `
+                | Should Be "Some original child text: Some Suffix"
+
+            ParentV3\Get-ParentV3 -prefix "Some Prefix" -suffix "Some Suffix" `
+                | Should Be "Some Prefix : Mocked child text using variables is not possible in V3 due to scopping: -  -"
+        }
+    }
 }
