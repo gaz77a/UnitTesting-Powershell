@@ -56,4 +56,41 @@ Describe "Get-ParentV5" {
                 | Should -Be "Some Prefix : Mocked child text using variables is possible in V5: - Mocked child text: Some Suffix using a variable -"
         }
     }
+
+    Context "Mocks Get-ParentV5" {
+        It "GIVEN_MocksGetParentV5_WHEN_Get-ParentV5SecondFunction_THEN_ReturnsMockedResult" {
+            # Arrange
+            $mockedResult = "Mocked child text: Some Suffix using a variable"
+            $mockScript = {
+                return "Mocked function in ParentV5 using variables is possible in V5: - $mockedResult -"
+            }
+
+            Mock -ModuleName ParentV5 -CommandName ParentV5\Get-ParentV5 -MockWith $mockScript -Verifiable
+
+            # Act & Assert
+            ParentV5\Get-ParentV5SecondFunction -prefix "Some Unused Prefix" -suffix "Some Unused Suffix" `
+                | Should -Be "Mocked function in ParentV5 using variables is possible in V5: - Mocked child text: Some Suffix using a variable -"
+        }
+    }
+
+    Context "Mocks Get-ParentV5" {
+        It "GIVEN_MocksGetParentV5_WHEN_Get-ParentV5SecondFunction_THEN_ReturnsMockedResult" {
+            # Arrange
+            $mockedResult = "Some mocked result"
+            $mockScript = {return @{
+                    Result = $mockedResult
+                    ResultPrefix = "Some mocked prefix"
+                    SomeProperty = "Some mocked value"
+                }          
+            } 
+
+            Mock -ModuleName ParentV5 -CommandName ParentV5\Get-ParentV5ReturnsObject -MockWith $mockScript -Verifiable
+
+            # Act 
+            $actualResult = ParentV5\Get-ParentV5UsesObject -prefix "Some Unused Prefix" -suffix "Some Unused Suffix"
+
+            # Assert
+            $actualResult | Should -Be "Called mocked function"
+        }
+    }
 }
