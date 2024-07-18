@@ -4,6 +4,13 @@ Import-Module "$PSScriptRoot\ParentV5.psm1"
 Import-Module "$PSScriptRoot\ChildV5.psm1"
 
 Describe "Get-ParentV5" {
+    $contextMockedResult = "Some context mocked result"
+        $contextMockScript = {return @{
+            Result = $contextMockedResult
+            ResultPrefix = "Some context mocked prefix"
+            SomeProperty = "Some context mocked value"
+            }          
+        } 
     Context "When mocking Get-ChildV5 function from ParentV5" {
         It "should mock calls to Get-ChildV5 from ParentV5" {
             # Arrange
@@ -74,7 +81,7 @@ Describe "Get-ParentV5" {
     }
 
     Context "Mocks Get-ParentV5" {
-        It "GIVEN_MocksGetParentV5_WHEN_Get-ParentV5SecondFunction_THEN_ReturnsMockedResult" {
+        It "GIVEN_MocksGetParentV5_WHEN_Get-ParentV5UsesObject_THEN_ReturnsMockedResult" {
             # Arrange
             $mockedResult = "Some mocked result"
             $mockScript = {return @{
@@ -93,4 +100,17 @@ Describe "Get-ParentV5" {
             $actualResult | Should -Be "Called mocked function"
         }
     }
+
+    # Context "Get-ParentV5" { # New test to incorporate global variables (was it here or under describe)
+    #     It "GIVEN_MocksGetParentV5_WHEN_Get-ParentV5UsesObject_THEN_ReturnsMockedResult" {
+    #         # Arrange
+    #         Mock -ModuleName ParentV5 -CommandName ParentV5\Get-ParentV5ReturnsObject -MockWith $contextMockScript -Verifiable
+
+    #         # Act 
+    #         $actualResult = ParentV5\Get-ParentV5UsesObject -prefix "Some Unused Prefix" -suffix "Some Unused Suffix"
+
+    #         # Assert
+    #         $actualResult | Should -Be "Called mocked function"
+    #     }
+    # }
 }
