@@ -24,10 +24,10 @@ function Get-ParentV5ReturnsObject {
         [string]$prefix,
         [string]$suffix
     )
-    
+
     $parentResult = Get-ParentV5 -prefix $prefix -suffix $suffix
     return @{
-        Result = $parentResult
+        Result       = $parentResult
         ResultPrefix = $prefix
         SomeProperty = "Some Value"
     }
@@ -38,7 +38,7 @@ function Get-ParentV5UsesObject {
         [string]$prefix,
         [string]$suffix
     )
-    
+
     $parentResult = Get-ParentV5ReturnsObject -prefix $prefix -suffix $suffix
     Write-Host "Parent result: $parentResult"
     if ($null -eq $parentResult) {
@@ -48,6 +48,7 @@ function Get-ParentV5UsesObject {
     if ($parentResult.SomeProperty -eq "Some Value") {
         return "Called original function"
     }
+
     return "Called mocked function"
 }
 

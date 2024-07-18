@@ -5,10 +5,19 @@ Import-Module "$PSScriptRoot\ChildV5.psm1"
 
 Describe "Get-ParentV5" {
     $globalMockedResult = "Some global mocked result"
-    $globalMockedScript =  @{
-        Result = $globalMockedResult
+
+    $globalMockedObject = {
+        Result       = $globalMockedResult
         ResultPrefix = "Some global mocked prefix"
-        SomeProperty = "Some global mocked value"     
+        SomeProperty = "Some global mocked value"
+    }
+
+    $globalMockedReturn = {
+        return @{
+            Result       = $globalMockedResult
+            ResultPrefix = "Some global mocked prefix"
+            SomeProperty = "Some global mocked value"
+        }
     }
 
     Context "When mocking Get-ChildV5 function from ParentV5" {
@@ -21,10 +30,10 @@ Describe "Get-ParentV5" {
 
             # Act & Assert
             ChildV5\Get-ChildV5 -suffix "Some Suffix" `
-                | Should -Be "Some original child text: Some Suffix"
+            | Should -Be "Some original child text: Some Suffix"
 
             ParentV5\Get-ParentV5 -prefix "Some Prefix" -suffix "Some Suffix" `
-                | Should -Be "Some Prefix : Mocked child text: Some Suffix"
+            | Should -Be "Some Prefix : Mocked child text: Some Suffix"
         }
     }
 
@@ -38,10 +47,10 @@ Describe "Get-ParentV5" {
 
             # Act & Assert
             ChildV5\Get-ChildV5 -suffix "Some Suffix" `
-                | Should -Be "Mocked direct call child text: Some Suffix"
+            | Should -Be "Mocked direct call child text: Some Suffix"
 
             ParentV5\Get-ParentV5 -prefix "Some Prefix" -suffix "Some Suffix" `
-                | Should -Be "Some Prefix : Some original child text: Some Suffix"
+            | Should -Be "Some Prefix : Some original child text: Some Suffix"
         }
     }
 
@@ -57,10 +66,10 @@ Describe "Get-ParentV5" {
 
             # Act & Assert
             ChildV5\Get-ChildV5 -suffix "Some Suffix" `
-                | Should -Be "Some original child text: Some Suffix"
+            | Should -Be "Some original child text: Some Suffix"
 
             ParentV5\Get-ParentV5 -prefix "Some Prefix" -suffix "Some Suffix" `
-                | Should -Be "Some Prefix : Mocked child text using variables is possible in V5: - Mocked child text: Some Suffix using a variable -"
+            | Should -Be "Some Prefix : Mocked child text using variables is possible in V5: - Mocked child text: Some Suffix using a variable -"
         }
     }
 
@@ -76,7 +85,7 @@ Describe "Get-ParentV5" {
 
             # Act & Assert
             ParentV5\Get-ParentV5SecondFunction -prefix "Some Unused Prefix" -suffix "Some Unused Suffix" `
-                | Should -Be "Mocked function in ParentV5 using variables is possible in V5: - Mocked child text: Some Suffix using a variable -"
+            | Should -Be "Mocked function in ParentV5 using variables is possible in V5: - Mocked child text: Some Suffix using a variable -"
         }
     }
 
@@ -84,16 +93,17 @@ Describe "Get-ParentV5" {
         It "GIVEN_MocksGetParentV5_WHEN_Get-ParentV5UsesObject_THEN_ReturnsMockedResult" {
             # Arrange
             $mockedResult = "Some mocked result"
-            $mockScript = {return @{
-                    Result = $mockedResult
+            $mockScript = {
+                return @{
+                    Result       = $mockedResult
                     ResultPrefix = "Some mocked prefix"
                     SomeProperty = "Some mocked value"
-                }          
-            } 
+                }
+            }
 
             Mock -ModuleName ParentV5 -CommandName ParentV5\Get-ParentV5ReturnsObject -MockWith $mockScript -Verifiable
 
-            # Act 
+            # Act
             $actualResult = ParentV5\Get-ParentV5UsesObject -prefix "Some Unused Prefix" -suffix "Some Unused Suffix"
 
             # Assert
@@ -101,16 +111,29 @@ Describe "Get-ParentV5" {
         }
     }
 
-    # Context "Get-ParentV5" { # New test to incorporate global variables (was it here or under describe)
-    #     It "GIVEN_MocksGetParentV5_WHEN_Get-ParentV5UsesObject_THEN_ReturnsMockedResult" {
-    #         # Arrange
-    #         Mock -ModuleName ParentV5 -CommandName ParentV5\Get-ParentV5ReturnsObject -MockWith $globalMockScript -Verifiable
+    Context "Global Mocks for Get-ParentV5" { # New test to incorporate global variables (was it here or under describe)
+        It "GIVEN_GlobalMocks_WHEN_Get-ParentV5UsesObject_THEN_MockingFailsAndReturnsNull" {
+            # Arrange
+            Mock -ModuleName ParentV5 -CommandName ParentV5\Get-ParentV5ReturnsObject -MockWith { return $globalMockedObject } -Verifiable
 
-    #         # Act 
-    #         $actualResult = ParentV5\Get-ParentV5UsesObject -prefix "Some Unused Prefix" -suffix "Some Unused Suffix"
+            # Act
+            $actualResult = ParentV5\Get-ParentV5UsesObject -prefix "Some Unused Prefix" -suffix "Some Unused Suffix"
 
-    #         # Assert
-    #         $actualResult | Should -Be "Called mocked function"
-    #     }
-    # }
+            # Assert
+            $actualResult | Should -Be "Mocking failed"
+        }
+    }
+
+    Context 'Global Mocked return for Get-ParentV5' -Skip { # Global script raises this error: ParameterBindingValidationException: Cannot bind argument to parameter 'Script Block' because it is null.
+        It 'GIVEN_GlobalMockedReturn_WHEN_Get-ParentV5UsesObject_THEN_ScriptBindingError' {
+            # Arrange
+            Mock -ModuleName ParentV5 -CommandName ParentV5\Get-ParentV5ReturnsObject -MockWith $globalMockedReturn -Verifiable
+
+            # Act
+            $actualResult = ParentV5\Get-ParentV5UsesObject -prefix "Some Unused Prefix" -suffix "Some Unused Suffix"
+
+            # Assert
+            $actualResult | Should -Be "Mocking failed"
+        }
+    }
 }
