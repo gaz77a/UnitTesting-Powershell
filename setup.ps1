@@ -27,14 +27,31 @@ if ($found -and ($found.Version -ge [version]$requiredVersion)) {
     Install-Module -Name Pester -RequiredVersion $requiredVersion -Scope CurrentUser -Force -ErrorAction Stop
 }
 
-# 4. Restore .NET Tools (dotnet-tools.json)
+# 4. Install VS Code Pester Test extension if not already installed
+Write-Host "`nChecking for VS Code Pester Test extension..." -ForegroundColor Cyan
+$extensionId = "pspester.pester-test"
+$installedExtensions = code --list-extensions 2>$null
+
+if ($installedExtensions -contains $extensionId) {
+    Write-Host "Pester Test extension already installed." -ForegroundColor Gray
+} else {
+    Write-Host "Installing Pester Test extension..." -ForegroundColor Cyan
+    code --install-extension $extensionId
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Pester Test extension installed successfully." -ForegroundColor Green
+    } else {
+        Write-Host "Warning: Could not install Pester Test extension. Make sure VS Code is installed and in your PATH." -ForegroundColor Yellow
+    }
+}
+
+# 5. Restore .NET Tools (dotnet-tools.json)
 Write-Host "`nRestoring .NET tools..." -ForegroundColor Cyan
 dotnet tool restore
 
-# 5. Verify .NET tools
+# 6. Verify .NET tools
 dotnet tool list
 
-# 6. Install Husky hooks
+# 7. Install Husky hooks
 Write-Host "`nInstalling Husky hooks..." -ForegroundColor Cyan
 dotnet husky install
 

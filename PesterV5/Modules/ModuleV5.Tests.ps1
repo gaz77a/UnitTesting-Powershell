@@ -21,7 +21,7 @@ Describe "Get-ParentV5" {
     }
 
     Context "When mocking Get-ChildV5 function from ParentV5" {
-        It "should mock calls to Get-ChildV5 from ParentV5" {
+        It "GIVEN_Get-ChildV5MockdFromParentV5_WHEN_Get-ParentV5_THEN_MockedCallReturned" {
             # Arrange
             Mock -ModuleName ParentV5 ChildV5\Get-ChildV5 {
                 param ($suffix)
@@ -38,7 +38,7 @@ Describe "Get-ParentV5" {
     }
 
     Context "When mocking Get-ChildV5 function directly" {
-        It "should mock only direct calls to Get-ChildV5" {
+        It "GIVEN_Get-ChildV5MockedDirectly_WHEN_Get-ParentV5_THEN_OriginalLogicCalled" {
             # Arrange
             Mock ChildV5\Get-ChildV5 {
                 param ($suffix)
@@ -54,7 +54,7 @@ Describe "Get-ParentV5" {
         }
     }
 
-    Context "MocksWithVariables Not Supported" {
+    Context "MocksWithVariables Is Supported" {
         It "GIVEN_MocksWithVariables_WHEN_Get-ParentV5_THEN_MockedVariableNotAvailable" {
             # Arrange
             $mockedResult = "Mocked child text: Some Suffix using a variable"
@@ -87,9 +87,7 @@ Describe "Get-ParentV5" {
             ParentV5\Get-ParentV5SecondFunction -prefix "Some Unused Prefix" -suffix "Some Unused Suffix" `
             | Should -Be "Mocked function in ParentV5 using variables is possible in V5: - Mocked child text: Some Suffix using a variable -"
         }
-    }
 
-    Context "Mocks Get-ParentV5" {
         It "GIVEN_MocksGetParentV5_WHEN_Get-ParentV5UsesObject_THEN_ReturnsMockedResult" {
             # Arrange
             $mockedResult = "Some mocked result"
@@ -111,7 +109,7 @@ Describe "Get-ParentV5" {
         }
     }
 
-    Context "Global Mocks for Get-ParentV5" { # New test to incorporate global variables (was it here or under describe)
+    Context "Global Mocks for Get-ParentV5" { # New test to incorporate global variables
         It "GIVEN_GlobalMocks_WHEN_Get-ParentV5UsesObject_THEN_MockingFailsAndReturnsNull" {
             # Arrange
             Mock -ModuleName ParentV5 -CommandName ParentV5\Get-ParentV5ReturnsObject -MockWith { return $globalMockedObject } -Verifiable

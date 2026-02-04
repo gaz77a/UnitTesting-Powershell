@@ -1,4 +1,4 @@
-# Pester v3 vs v5 Differences
+# Pester v3 vs v5
 
 ## Overview
 This document outlines the key differences between Pester v3 and v5, and why v5 should be preferred for new projects.

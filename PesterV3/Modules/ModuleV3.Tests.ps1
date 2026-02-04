@@ -5,7 +5,7 @@ Import-Module "$PSScriptRoot\ChildV3.psm1"
 
 Describe "Get-ParentV3" {
     Context "When mocking Get-ChildV3 function from ParentV3" {
-        It "should mock calls to Get-ChildV3 from ParentV3" {
+        It "GIVEN_Get-ChildV3MockedFromParentV3_WHEN_Get-ParentV3_THEN_MockedCallReturned" {
             # Arrange
             Mock -ModuleName ParentV3 ChildV3\Get-ChildV3 {
                 param ($suffix)
@@ -22,7 +22,7 @@ Describe "Get-ParentV3" {
     }
 
     Context "When mocking Get-ChildV3 function directly" {
-        It "should mock only direct calls to Get-ChildV3" {
+        It "GIVEN_Get-ChildV3MockedDirectly_WHEN_Get-ParentV3_THEN_OriginalLogicCalled" {
             # Arrange
             Mock ChildV3\Get-ChildV3 {
                 param ($suffix)
@@ -38,7 +38,7 @@ Describe "Get-ParentV3" {
         }
     }
 
-    Context "MocksWithVariables" {
+    Context "MocksWithVariables Is Not Supported" {
         It "GIVEN_MocksWithVariables_WHEN_Get-ParentV3_THEN_MockedVariableNotAvailable" {
             # Arrange
             $mockedResult = "Mocked child text: Some Suffix using a variable"
