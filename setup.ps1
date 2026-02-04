@@ -6,26 +6,64 @@ if (-not $repo) {
 }
 Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
 
-# Install Pester v5 for the current user (project-independent install)
+# Install Pester for the current user (project-independent install)
 # This installs Pester into the CurrentUser module scope so VS Code's PowerShell
 # extension and integrated console can find it without relying on a repo-local .modules.
+# 
+# The script installs both Pester v5 (stable) and v6 (preview) side by side
 
-#2. Find the newest version that is < 6.0.0
-$requiredVersion = Find-Module -Name Pester -MaximumVersion "5.999.999" | Select-Object -First 1 -ExpandProperty Version
+Write-Host "`nInstalling Pester versions..." -ForegroundColor Cyan
+
+# Define versions to install
+$versionsToInstall = @(
+    @{ Major = 5; MaxVersion = "5.999.999"; MinVersion = "5.0.0"; Label = "v5 (Stable)" }
+    @{ Major = 6; MaxVersion = "6.999.999"; MinVersion = "6.0.0"; Label = "v6 (Preview)" }
+)
+
+foreach ($versionConfig in $versionsToInstall) {
+    Write-Host "`n--- Installing Pester $($versionConfig.Label) ---" -ForegroundColor Cyan
     
-Write-Host "Checking for Pester $requiredVersion..." -ForegroundColor Cyan
-$found = Get-Module -ListAvailable -Name Pester | Sort-Object -Property Version -Descending | Select-Object -First 1
+    #2. Find the newest version for this major version
+    if ($versionConfig.Major -eq 6) {
+        # For v6 (preview), include pre-release versions
+        $requiredVersion = Find-Module -Name Pester -MaximumVersion $versionConfig.MaxVersion -AllowPrerelease | Select-Object -First 1 -ExpandProperty Version
+    } else {
+        # For v5 (stable), only stable versions
+        $requiredVersion = Find-Module -Name Pester -MaximumVersion $versionConfig.MaxVersion | Select-Object -First 1 -ExpandProperty Version
+    }
+    
+    Write-Host "Checking for Pester $requiredVersion..." -ForegroundColor Gray
+    $found = Get-Module -ListAvailable -Name Pester | Where-Object { $_.Version -ge [version]$versionConfig.MinVersion -and $_.Version -lt [version]"$($versionConfig.Major + 1).0.0" } | Sort-Object -Property Version -Descending | Select-Object -First 1
 
-#3. Install or update Pester
-if ($found -and ($found.Version -ge [version]$requiredVersion)) {
-    Write-Host "Found Pester $($found.Version) at $($found.ModuleBase). Nothing to install." -ForegroundColor Gray
-} elseif ($found -and ($found.Version -ge [version]"5.0.0")) {
-    Write-Host "Updating Pester from $($found.Version) to $requiredVersion for CurrentUser..." -ForegroundColor Cyan
-    Update-Module -Name Pester -RequiredVersion $requiredVersion -Scope CurrentUser -Force -ErrorAction Stop
-} else {
-    Write-Host "Installing Pester $requiredVersion for CurrentUser..." -ForegroundColor Cyan
-    Install-Module -Name Pester -RequiredVersion $requiredVersion -Scope CurrentUser -Force -ErrorAction Stop
+    #3. Install or update Pester
+    $installParams = @{
+        Name = "Pester"
+        RequiredVersion = $requiredVersion
+        Scope = "CurrentUser"
+        Force = $true
+        AllowClobber = $true
+        ErrorAction = "Stop"
+    }
+    
+    # Add AllowPrerelease parameter if this is v6
+    if ($versionConfig.Major -eq 6) {
+        $installParams["AllowPrerelease"] = $true
+    }
+    
+    if ($found -and ($found.Version -ge [version]$requiredVersion)) {
+        Write-Host "Found Pester $($found.Version) at $($found.ModuleBase). Nothing to install." -ForegroundColor Gray
+    } else {
+        if ($found) {
+            Write-Host "Updating Pester $($versionConfig.Label) from $($found.Version) to $requiredVersion for CurrentUser..." -ForegroundColor Cyan
+        } else {
+            Write-Host "Installing Pester $requiredVersion ($($versionConfig.Label)) for CurrentUser..." -ForegroundColor Cyan
+        }
+        Install-Module @installParams
+    }
 }
+
+Write-Host "`nVerifying Pester installations..." -ForegroundColor Cyan
+Get-Module -ListAvailable -Name Pester | Select-Object Name, Version, ModuleBase | Format-Table -AutoSize
 
 # 4. Restore .NET Tools (dotnet-tools.json)
 Write-Host "`nRestoring .NET tools..." -ForegroundColor Cyan
